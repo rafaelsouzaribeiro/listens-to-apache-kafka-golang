@@ -44,6 +44,7 @@ func NewConsumer() *Consumer {
 func (p *Consumer) GetConsumer(brokers []string, groupId string) (sarama.ConsumerGroup, error) {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
+	config.Consumer.Offsets.AutoCommit.Enable = true
 
 	client, err := sarama.NewConsumerGroup(brokers, groupId, config)
 
