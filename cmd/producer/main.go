@@ -9,9 +9,11 @@ import (
 func main() {
 	produc := NewProducer.NewProducer()
 	prod, err := produc.GetProducer([]string{"springboot:9092"})
+
 	if err != nil {
 		panic(err)
 	}
+
 	defer func() {
 		if err := (*prod).Close(); err != nil {
 			panic(err)
