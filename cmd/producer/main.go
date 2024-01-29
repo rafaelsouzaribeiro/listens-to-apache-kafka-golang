@@ -20,6 +20,7 @@ func main() {
 		}
 	}()
 
-	produc.SendMessage(prod, "contact-adm-insert", sarama.StringEncoder("Hello World2!"))
+	message := []byte("Hello World2!")
+	produc.SendMessage(prod, "contact-adm-insert", sarama.ByteEncoder(message))
 
 }
