@@ -12,6 +12,10 @@ type consumerGroupHandler struct{}
 type Consumer struct {
 	errors  chan error
 	handler *consumerGroupHandler
+	brokers []string
+	groupId string
+	topics  []string
+	config  *sarama.Config
 }
 
 // Cleanup implements sarama.ConsumerGroupHandler.
@@ -37,16 +41,19 @@ func (c *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession,
 	return nil
 }
 
-func NewConsumer() *Consumer {
-	return &Consumer{}
+func NewConsumer(brokers []string, groupId string, topics []string, config *sarama.Config) *Consumer {
+	return &Consumer{
+		brokers: brokers,
+		groupId: groupId,
+		topics:  topics,
+		config:  config,
+		errors:  make(chan error),
+	}
 }
 
-func (p *Consumer) GetConsumer(brokers []string, groupId string) (sarama.ConsumerGroup, error) {
-	config := sarama.NewConfig()
-	config.Consumer.Return.Errors = true
-	config.Consumer.Offsets.AutoCommit.Enable = true
+func (p *Consumer) GetConsumer() (sarama.ConsumerGroup, error) {
 
-	client, err := sarama.NewConsumerGroup(brokers, groupId, config)
+	client, err := sarama.NewConsumerGroup(p.brokers, p.groupId, p.config)
 
 	if err != nil {
 		return nil, err
@@ -55,15 +62,15 @@ func (p *Consumer) GetConsumer(brokers []string, groupId string) (sarama.Consume
 	return client, nil
 }
 
-func (p *Consumer) VerifyConsumer(client sarama.ConsumerGroup, topics []string) (error, context.CancelFunc) {
+func (p *Consumer) VerifyConsumer(client sarama.ConsumerGroup) (context.CancelFunc, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	err := client.Consume(ctx, topics, p.handler)
+	err := client.Consume(ctx, p.topics, p.handler)
 	if err != nil {
-		return err, cancel
+		return cancel, err
 	}
 
-	return nil, cancel
+	return cancel, nil
 
 }
 
@@ -79,19 +86,16 @@ func (p *Consumer) VerifyError(client sarama.ConsumerGroup) error {
 				close(p.errors)
 				return
 			}
+
 			p.errors <- err
 
 		}
 	}()
 
-	for {
-		select {
-		case err, ok := <-p.errors:
-			if !ok {
-				// Canal de erros fechado, sair do loop
-				fmt.Println(err.Error())
-				return err
-			}
-		}
+	for err := range p.errors {
+		fmt.Println(err.Error())
+		return err // Assuming you want to stop after receiving the first error
 	}
+
+	return nil
 }
