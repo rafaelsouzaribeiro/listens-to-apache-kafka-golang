@@ -8,7 +8,7 @@ import (
 	NewProducer "github.com/rafaelsouzaribeiro/listens-to-apache-kafka-golang/pkg/utils/producer"
 )
 
-func BenchmarkCalculeteTax(b *testing.B) {
+func BenchmarkProducer(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		err := Main(i)
