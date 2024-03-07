@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/IBM/sarama"
@@ -10,16 +11,16 @@ import (
 func BenchmarkCalculeteTax(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
-		Main()
+		Main(i)
 	}
 }
 
-func Main() {
+func Main(i int) {
 	config := sarama.NewConfig()
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Retry.Max = 5
 	config.Producer.Return.Successes = true
-	message := []byte("Hello World2!")
+	message := []byte(fmt.Sprintf("Hello World! %d", i))
 
 	produc := NewProducer.NewProducer([]string{"springboot:9092"}, "contact-adm-insert",
 		sarama.ByteEncoder(message), config)
