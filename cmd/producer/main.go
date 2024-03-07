@@ -7,8 +7,15 @@ import (
 )
 
 func main() {
-	produc := NewProducer.NewProducer()
-	prod, err := produc.GetProducer([]string{"springboot:9092"})
+	config := sarama.NewConfig()
+	config.Producer.RequiredAcks = sarama.WaitForAll
+	config.Producer.Retry.Max = 5
+	config.Producer.Return.Successes = true
+	message := []byte("Hello World2!")
+
+	produc := NewProducer.NewProducer([]string{"springboot:9092"}, "contact-adm-insert",
+		sarama.ByteEncoder(message), config)
+	prod, err := produc.GetProducer()
 
 	if err != nil {
 		panic(err)
@@ -20,7 +27,6 @@ func main() {
 		}
 	}()
 
-	message := []byte("Hello World2!")
-	produc.SendMessage(prod, "contact-adm-insert", sarama.ByteEncoder(message))
+	produc.SendMessage(prod)
 
 }

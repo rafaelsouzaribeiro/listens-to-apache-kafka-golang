@@ -7,20 +7,24 @@ import (
 )
 
 type Producer struct {
-	// Implementação de IProducer
+	addrs   []string
+	topic   string
+	message sarama.Encoder
+	config  *sarama.Config
 }
 
-func NewProducer() *Producer {
-	return &Producer{}
+func NewProducer(addrs []string, topic string, message sarama.Encoder, config *sarama.Config) *Producer {
+	return &Producer{
+		addrs:   addrs,
+		topic:   topic,
+		message: message,
+		config:  config,
+	}
 }
 
-func (p *Producer) GetProducer(addrs []string) (*sarama.AsyncProducer, error) {
-	config := sarama.NewConfig()
-	config.Producer.RequiredAcks = sarama.WaitForAll
-	config.Producer.Retry.Max = 5
-	config.Producer.Return.Successes = true
+func (p *Producer) GetProducer() (*sarama.AsyncProducer, error) {
 
-	producer, err := sarama.NewAsyncProducer(addrs, config)
+	producer, err := sarama.NewAsyncProducer(p.addrs, p.config)
 
 	if err != nil {
 		return nil, err
@@ -29,8 +33,8 @@ func (p *Producer) GetProducer(addrs []string) (*sarama.AsyncProducer, error) {
 	return &producer, err
 }
 
-func (p *Producer) SendMessage(producer *sarama.AsyncProducer, topic string, value sarama.Encoder) {
-	message := &sarama.ProducerMessage{Topic: topic, Value: value}
+func (p *Producer) SendMessage(producer *sarama.AsyncProducer) {
+	message := &sarama.ProducerMessage{Topic: p.topic, Value: p.message}
 
 	(*producer).Input() <- message
 
