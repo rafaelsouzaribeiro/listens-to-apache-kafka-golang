@@ -11,11 +11,15 @@ import (
 func BenchmarkCalculeteTax(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
-		Main(i)
+		err := Main(i)
+		if err != nil {
+			b.Errorf("Error sending message: %v", err)
+			break
+		}
 	}
 }
 
-func Main(i int) {
+func Main(i int) error {
 	config := sarama.NewConfig()
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Retry.Max = 5
@@ -27,7 +31,7 @@ func Main(i int) {
 	prod, err := produc.GetProducer()
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	defer func() {
@@ -36,5 +40,5 @@ func Main(i int) {
 		}
 	}()
 
-	produc.SendMessage(prod)
+	return produc.SendMessage(prod)
 }

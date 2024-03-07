@@ -33,7 +33,7 @@ func (p *Producer) GetProducer() (*sarama.AsyncProducer, error) {
 	return &producer, err
 }
 
-func (p *Producer) SendMessage(producer *sarama.AsyncProducer) {
+func (p *Producer) SendMessage(producer *sarama.AsyncProducer) error {
 	message := &sarama.ProducerMessage{Topic: p.topic, Value: p.message}
 
 	(*producer).Input() <- message
@@ -43,5 +43,8 @@ func (p *Producer) SendMessage(producer *sarama.AsyncProducer) {
 		fmt.Println("Mensagem produzida:", success.Value)
 	case err := <-(*producer).Errors():
 		fmt.Println("Falho para mensagem produzida:", err)
+		return err
 	}
+
+	return nil
 }

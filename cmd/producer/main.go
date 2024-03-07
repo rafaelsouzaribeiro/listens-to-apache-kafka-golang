@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	NewProducer "github.com/rafaelsouzaribeiro/listens-to-apache-kafka-golang/pkg/utils/producer"
 
 	"github.com/IBM/sarama"
@@ -27,6 +29,10 @@ func main() {
 		}
 	}()
 
-	produc.SendMessage(prod)
+	err = produc.SendMessage(prod)
+
+	if err != nil {
+		fmt.Printf("Error sending message: %v", message)
+	}
 
 }
