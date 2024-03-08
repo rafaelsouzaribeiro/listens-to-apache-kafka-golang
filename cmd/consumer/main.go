@@ -8,7 +8,7 @@ import (
 func main() {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
-	config.Consumer.Offsets.AutoCommit.Enable = true
+	//config.Consumer.Offsets.AutoCommit.Enable = true
 
 	con := NewConsumer.NewConsumer([]string{"springboot:9092"}, "contact-adm",
 		[]string{"contact-adm-insert"}, config)
