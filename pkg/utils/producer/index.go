@@ -40,7 +40,13 @@ func (p *Producer) SendMessage(producer *sarama.AsyncProducer) error {
 
 	select {
 	case success := <-(*producer).Successes():
-		fmt.Println("Mensagem produzida:", success.Value)
+		value, err := success.Value.Encode()
+		if err != nil {
+			fmt.Println("Error encoding message:", err)
+			return err
+		}
+
+		fmt.Println("Mensagem produzida:", string(value))
 	case err := <-(*producer).Errors():
 		fmt.Println("Falho para mensagem produzida:", err)
 		return err
