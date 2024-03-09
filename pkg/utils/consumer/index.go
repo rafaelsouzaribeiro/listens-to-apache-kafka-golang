@@ -83,12 +83,11 @@ func (p *Consumer) VerifyError(client sarama.ConsumerGroup) error {
 			if err != nil {
 				// Se houver um erro, feche o canal de erros e encerre a goroutine
 				fmt.Println("Ocorreu algum erro")
+
+				p.errors <- err
 				close(p.errors)
 				return
 			}
-
-			p.errors <- err
-
 		}
 	}()
 
